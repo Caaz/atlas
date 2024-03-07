@@ -1,21 +1,30 @@
 extends Node
 
+var Transition = load("res://scenes/transition/transition.tscn")
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-# Function to change the current scene to a new scene specified by 'path'
+var _target_scene: String
+var _scene_tree: SceneTree
+var _transition_animation_player: AnimationPlayer
+var _transition_node: CanvasLayer
 func change_scene_to(path: String) -> void:
-	# Ensure the path is valid to avoid runtime errors
 	if ResourceLoader.exists(path):
-		# Get the current SceneTree and change the scene
-		var scene_tree = get_tree()
-		scene_tree.change_scene_to_file(path)
+		_scene_tree = get_tree()
+		_target_scene = path
+		
+		_transition_node = Transition.instantiate()
+		# Get the window node, and add the transition node
+		_scene_tree.root.add_child(_transition_node)
+		
+		_transition_animation_player = _transition_node.get_node("AnimationPlayer")
+		_transition_animation_player.play("transition_in")
+		_transition_animation_player.animation_finished.connect(_on_transition_end)
 	else:
-		print("The scene path does not exist: ", path)
+		printerr("The scene path does not exist: ", path)
+
+func _on_transition_end(_animation_name: String):
+	if _animation_name == "transition_in":
+		print_verbose("changing scene to ", _target_scene)
+		_scene_tree.change_scene_to_file(_target_scene)
+		_transition_animation_player.play("transition_out")
+	elif _animation_name == "transition_out":
+		_transition_node.queue_free()
