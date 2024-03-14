@@ -1,11 +1,16 @@
 extends Node2D
 var item_container:VBoxContainer
 var some_data:int = 0
+class Exception:
+	var message:String
+	func _init(message:String):
+		self.message = message
+		printerr(message)
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	item_container = $CenterContainer/ItemContainer
-	add_menu_item("Test", test_function)
 	add_menu_item("Increment", func():
 		some_data += 1
 	)
@@ -22,6 +27,3 @@ func add_menu_item(text:String, callback:Callable):
 	menu_item.text = text
 	menu_item.pressed.connect(callback)
 	item_container.add_child(menu_item)
-	
-func test_function():
-	print("Test function called. ", some_data)
